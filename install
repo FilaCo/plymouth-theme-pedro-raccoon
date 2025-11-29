@@ -1,0 +1,68 @@
+#!/bin/sh
+
+set -e
+
+if [ "$(id -u)" != "0" ]; then
+    exec sudo "${0}" "${@}"
+fi
+
+themes_directory="/usr/share/plymouth/themes"
+theme_name="pedro-raccoon"
+
+install() {
+    set -x
+    if [ -d "${themes_directory}/${theme_name}" ]; then
+        uninstall
+    fi
+    cp -r "$(dirname "${0}")/${theme_name}" "${themes_directory}/"
+    update-alternatives \
+        --install \
+        "${themes_directory}/default.plymouth" \
+        default.plymouth \
+        "${themes_directory}/${theme_name}/${theme_name}.plymouth" \
+        100
+
+    update-alternatives \
+        --set \
+        default.plymouth \
+        "${themes_directory}/${theme_name}/${theme_name}.plymouth"
+
+    update-initramfs -u
+}
+
+uninstall() {
+    set -x
+    update-alternatives \
+        --remove \
+        default.plymouth \
+        "${themes_directory}/${theme_name}/${theme_name}.plymouth"
+    # Prompt user for a different theme
+    update-alternatives \
+        --config \
+        default.plymouth
+    update-initramfs -u
+    rm -rvf "${themes_directory:?}/${theme_name:?}/"
+}
+
+usage() {
+    echo "Usage: ${0} [uninstall]" >&2
+    exit 1
+}
+
+if [ "${1}" = "-h" ] || [ "${1}" = "--help" ] || [ "${1}" = "help" ]; then
+    usage
+fi
+
+if [ ! -d "${themes_directory}" ]; then
+    echo "\"${themes_directory}\" directory does not exist" >&2
+    exit 1
+fi
+
+case "${1}" in
+    "")
+        install;;
+    uninstall)
+        uninstall;;
+    *)
+        usage;;
+esac
