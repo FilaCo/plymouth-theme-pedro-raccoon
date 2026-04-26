@@ -25,3 +25,33 @@ fun update() {
 }
 
 Plymouth.SetRefreshFunction(update);
+
+// Password dialog
+prompt_sprite = Sprite();
+bullets_sprite = Sprite();
+
+fun display_password_callback(prompt, bullets) {
+    cur_sprite.SetY(screen.half.h - images[0].GetHeight() / 2 - 60);
+
+    prompt_image = Image.Text(prompt, 1, 1, 1, 1);
+    prompt_sprite.SetImage(prompt_image);
+    anim_bottom = screen.half.h + images[0].GetHeight() / 2 - 60;
+
+    prompt_sprite.SetX(screen.half.w - prompt_image.GetWidth() / 2);
+    prompt_sprite.SetY(anim_bottom + 20);
+    prompt_sprite.SetZ(1);
+
+    bullet_str = "";
+    for (i = 0; i < bullets; i++) {
+        bullet_str = bullet_str + "* ";
+    }
+    if (bullet_str == "") bullet_str = "_______________";
+
+    bullets_image = Image.Text(bullet_str, 0.4, 0.8, 1, 1);
+    bullets_sprite.SetImage(bullets_image);
+    bullets_sprite.SetX(screen.half.w - bullets_image.GetWidth() / 2);
+    bullets_sprite.SetY(anim_bottom + 50);
+    bullets_sprite.SetZ(1);
+}
+
+Plymouth.SetDisplayPasswordFunction(display_password_callback);
